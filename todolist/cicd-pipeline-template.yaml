@@ -167,6 +167,16 @@ spec:
                   }
                 }
               }
+              stage('Cleanup'){
+
+                echo 'Email Distro'
+
+                mail body: 'project build successful',
+                     from: 'rick.stewart@dlt.com',
+                     replyTo: 'rick.stewart@dlt.com',
+                     subject: 'project build successful',
+                     to: 'rick.stewart@dlt.com'
+              }
             }
           }
       type: JenkinsPipeline

@@ -32,10 +32,14 @@ spec:
             agent {
               label 'maven'
             }
+            // using the Timestamper plugin we can add timestamps to the console log
+            options {
+              timestamps()
+            }
             stages {
               stage('Build App') {
                 steps {
-                  git branch: 'eap-7', url: 'http://gogs:3000/gogs/openshift-tasks.git'
+                  git branch: ${env.BRANCH_NAME}, url: 'https://github.com/DLT-Solutions-JBoss/openshift-quickstarts.git'
                   script {
                       def pom = readMavenPom file: 'pom.xml'
                       version = pom.version

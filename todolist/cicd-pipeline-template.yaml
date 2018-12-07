@@ -39,7 +39,7 @@ spec:
             stages {
               stage('Build App') {
                 steps {
-                  git branch: ${env.BRANCH_NAME}, url: 'https://github.com/DLT-Solutions-JBoss/openshift-quickstarts.git'
+                  git branch: "${env.BRANCH_NAME}", url: 'https://github.com/DLT-Solutions-JBoss/openshift-quickstarts.git'
                   script {
                       def pom = readMavenPom file: 'pom.xml'
                       version = pom.version

@@ -37,34 +37,41 @@ spec:
               timestamps()
             }
             stages {
-              stage('Build App') {
+            
+              stage('Build') {
                 steps {
                   git branch: "${env.BRANCH_NAME}", url: 'https://github.com/DLT-Solutions-JBoss/openshift-quickstarts.git'
                   script {
                       def pom = readMavenPom file: 'pom.xml'
                       version = pom.version
                   }
+                  echo "Building version ${version}"
+
                   sh "${mvnCmd} install -DskipTests=true"
                 }
               }
-              stage('Test') {
+              
+              stage('Unit Test') {
                 steps {
                   sh "${mvnCmd} test"
                   step([$class: 'JUnitResultArchiver', testResults: '**/target/surefire-reports/TEST-*.xml'])
                 }
               }
-              stage('Code Analysis') {
+              
+              stage('Static Code Analysis') {
                 steps {
                   script {
                     sh "${mvnCmd} sonar:sonar -Dsonar.host.url=http://sonarqube:9000 -DskipTests=true"
                   }
                 }
               }
+              
               stage('Archive App') {
                 steps {
                   sh "${mvnCmd} deploy -DskipTests=true -P nexus3"
                 }
               }
+              
               stage('Create Image Builder') {
                 when {
                   expression {
@@ -85,6 +92,7 @@ spec:
                   }
                 }
               }
+              
               stage('Build Image') {
                 steps {
                   sh "rm -rf oc-build && mkdir -p oc-build/deployments"
@@ -99,6 +107,7 @@ spec:
                   }
                 }
               }
+              
               stage('Create DEV') {
                 when {
                   expression {
@@ -109,6 +118,7 @@ spec:
                     }
                   }
                 }
+                
                 steps {
                   script {
                     openshift.withCluster() {
@@ -126,6 +136,7 @@ spec:
                   }
                 }
               }
+              
               stage('Deploy DEV') {
                 steps {
                   script {
@@ -137,7 +148,22 @@ spec:
                   }
                 }
               }
-              
+
+              parallel { 
+                          stage('QA Test') 
+                          {
+                             steps {
+                               echo "Running the QA test..."
+                             }
+                          }
+                          stage('Performance Test') 
+                          {
+                             steps {
+                               echo "Running the performance test..."
+                             }
+                          }
+                       }
+
               stage('Promote to STAGE?') {
                 steps {
                   timeout(time:15, unit:'MINUTES') {
@@ -151,6 +177,7 @@ spec:
                   }
                 }
               }
+              
               stage('Deploy STAGE') {
                 steps {
                   script {
@@ -168,6 +195,7 @@ spec:
                   }
                 }
               }
+              
               stage('Cleanup'){
 
                 echo 'Email Distro'
@@ -179,5 +207,23 @@ spec:
                      to: 'rick.stewart@dlt.com'
               }
             }
+        post {
+        always {
+            echo 'This will always run'
+        }
+        success {
+            echo 'This will run only if successful'
+        }
+        failure {
+            echo 'This will run only if failed'
+        }
+        unstable {
+            echo 'This will run only if the run was marked as unstable'
+        }
+        changed {
+            echo 'This will run only if the state of the Pipeline has changed'
+            echo 'For example, if the Pipeline was previously failing but is now successful'
+        }
+    }
           }
       type: JenkinsPipeline

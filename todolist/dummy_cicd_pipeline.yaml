@@ -21,10 +21,14 @@ spec:
     strategy:
       jenkinsPipelineStrategy:
         env:
-        - name: DEV_PROJECT
-          value: dev-user1
-        - name: STAGE_PROJECT
-          value: stage-user1
+        - name: CICD_PROJECT
+          value: cicd-projectX
+        - name: QA_PROJECT
+          value: qa-projectX
+        - name: PERF_PROJECT
+          value: perf-projectX
+        - name: UAT_PROJECT
+          value: uat-projectX
         jenkinsfile: |-
           def version, mvnCmd = "mvn -s configuration/cicd-settings-nexus3.xml"
 
@@ -164,25 +168,25 @@ spec:
                           }
                        }
 
-              stage('Promote to STAGE?') {
+              stage('Promote to User Acceptance?') {
                 steps {
                   timeout(time:15, unit:'MINUTES') {
-                      input message: "Promote to STAGE?", ok: "Promote"
+                      input message: "Promote to User Acceptance?", ok: "Promote"
                   }
 
                   script {
                     openshift.withCluster() {
-                      openshift.tag("${env.DEV_PROJECT}/tasks:latest", "${env.STAGE_PROJECT}/tasks:${version}")
+                      openshift.tag("${env.DEV_PROJECT}/tasks:latest", "${env.UAT_PROJECT}/tasks:${version}")
                     }
                   }
                 }
               }
               
-              stage('Deploy STAGE') {
+              stage('Deploy User Acceptance') {
                 steps {
                   script {
                     openshift.withCluster() {
-                      openshift.withProject(env.STAGE_PROJECT) {
+                      openshift.withProject(env.UAT_PROJECT) {
                         if (openshift.selector('dc', 'tasks').exists()) {
                           openshift.selector('dc', 'tasks').delete()
                           openshift.selector('svc', 'tasks').delete()

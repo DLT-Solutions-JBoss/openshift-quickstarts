@@ -52,7 +52,7 @@
         <maven.compiler.target>1.6</maven.compiler.target>
         <maven.compiler.source>1.6</maven.compiler.source>
 
-        <version.mongodb.driver>3.0.3</version.mongodb.driver>
+        <version.mongodb.driver>3.12.10</version.mongodb.driver>
 
         <jboss-servlet-api_3.0_spec.version>1.0.0.Final</jboss-servlet-api_3.0_spec.version>
     </properties>
